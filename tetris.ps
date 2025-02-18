@@ -1,0 +1,590 @@
+%!PS
+
+%%Title: tetris.ps
+%%Creator: Nicolas Seriot
+
+% February 2025
+% https://github.com/nst/PSTris
+
+% gv tetris.ps
+% stty raw -echo; cat >> t.txt
+
+/COLS 10 def
+/ROWS 22 def
+/S 20 def
+/EMPTY 9 def
+
+/= { =only } bind def
+
+/Sleep { 1000000 mul {} repeat } bind def
+
+/INPUT_FILE (/Users/nseriot/Projects/PSTris/t.txt) def
+/SCORE_FILE (/Users/nseriot/Projects/PSTris/highscore.txt) def
+
+/CreateOrTruncateInputFile {
+	{
+		INPUT_FILE (w) file closefile
+	} stopped {
+	    (-- error creating file ) = INPUT_FILE = flush
+	} if
+} bind def
+
+/ReadInput_s_ {	
+	{
+		INPUT_FILE (r) file 8 string readstring { } { } ifelse
+		dup length 0 ne { CreateOrTruncateInputFile } if
+	} stopped {
+		CreateOrTruncateInputFile
+	} if
+} bind def
+
+/DrawCell {
+	0 0 S S
+	4 copy
+	rectfill
+	0 setgray
+	rectstroke	
+} bind def
+
+/_c_r_DrawNextTetrimino {
+	/r exch def
+	/c exch def
+	
+	/t Tetriminos c get r get def
+	
+	gsave
+	
+	240 300 translate
+		
+	% clear zone
+	1 setgray
+	0 0 5 S mul 5 S mul
+	4 copy
+	rectfill
+	0 setgray
+	rectstroke
+		
+	Palette c get exec setrgbcolor
+	
+	0 1 4 { /x exch def
+		0 1 4 { /y exch def
+			t y 5 mul x add get 1 eq {
+				gsave
+				x S mul 5 y sub 1 sub S mul translate DrawCell
+				grestore
+			} if
+		} for
+	} for
+	
+	grestore
+} bind def
+
+/Palette [
+	{ 0.5 0   1   } % T - purple
+	{ 0   0   1   } % J - blue
+	{ 1   0   0   } % Z - red
+	{ 1   1   0   } % O - yellow
+	{ 0.5 1   0   } % S - green
+	{ 1   0.5 0   } % L - orange
+	{ 0.5 1   1   } % I - cyan
+] bind def
+
+/DrawLevelAndScore {
+	gsave
+	
+	240 150 translate
+	
+	% clear zone
+	1 setgray
+	0 -10 180 150
+	rectfill
+	
+	/Helvetica findfont 18 scalefont setfont
+	
+	0 setgray
+	
+	0 120 moveto (Level:) show 60 120 moveto level     (         ) cvs show
+	0  90 moveto (Score:) show 60  90 moveto score     (         ) cvs show
+	0  60 moveto (High:)  show 60  60 moveto highscore (         ) cvs show
+	
+	gameIsOver {
+		0 30 moveto (GAME OVER)  show
+		0 0 moveto  ([N]ew game) show
+	} if
+	
+	grestore
+} bind def
+
+/DrawWorld {
+	
+	gsave
+	
+	% clear zone
+	0.8 setgray
+	0 0 COLS S mul ROWS 2 sub S mul rectfill
+	
+	0 1 WORLD length 1 sub { /i exch def
+		WORLD i get EMPTY ne {
+			
+			Palette WORLD i get 10 mod get exec setrgbcolor
+			
+			gsave
+			i COLS mod S mul 
+			ROWS i COLS idiv sub 1 sub S mul
+			translate
+			DrawCell
+			grestore
+		} if
+	} for
+	
+	0 setgray
+	0 0 COLS S mul ROWS 2 sub S mul rectstroke
+	
+	grestore
+
+} bind def
+
+/_t_x_y_RemoveActiveT {
+		
+	/y exch def
+	/x exch def
+	/t def
+	
+	0 1 t length 1 sub { /ti exch def
+			
+		/wi ti x y _ti_x_y_TIndexToWIndex_wi_ def
+
+		wi null ne {
+			WORLD wi get 10 ge {
+				WORLD wi EMPTY put
+			} if
+		} if
+	} for
+	
+} bind def
+
+/_t_x_y_AddActiveT {
+
+	/y exch def
+	/x exch def
+	/t exch def
+
+	0 1 t length 1 sub { /ti exch def
+		t ti get 1 eq {
+			/wi ti x y _ti_x_y_TIndexToWIndex_wi_ def
+			WORLD wi 10 c add put
+		} if
+	} for
+
+} bind def
+
+/Tu [0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0] bind def
+/Tr [0 0 0 0 0 0 0 1 0 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0] bind def
+/Td [0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 1 0 0 0 0 0 0 0] bind def
+/Tl [0 0 0 0 0 0 0 1 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0 0 0] bind def
+/Jl [0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 1 1 0 0 0 0 0 0 0] bind def
+/Ju [0 0 0 0 0 0 1 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0] bind def
+/Jr [0 0 0 0 0 0 0 1 1 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0] bind def
+/Jd [0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 1 0 0 0 0 0 0] bind def
+/Zh [0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 1 1 0 0 0 0 0 0] bind def
+/Zv [0 0 0 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0] bind def
+/O  [0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 1 1 0 0 0 0 0 0 0] bind def
+/Sh [0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 1 1 0 0 0 0 0 0 0] bind def
+/Sv [0 0 0 0 0 0 0 1 0 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0 0] bind def
+/Lr [0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 0 0 0] bind def
+/Ld [0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 1 0 0 0 0 0 0 0 0] bind def
+/Ll [0 0 0 0 0 0 1 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0] bind def
+/Lu [0 0 0 0 0 0 0 0 1 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0] bind def
+/Iv [0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0] bind def
+/Ih [0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0] bind def
+
+/Tetriminos [
+	[Td Tl Tu Tr]
+	[Jd Jl Ju Jr]
+	[Zh Zv]
+	[O]
+	[Sh Sv]
+	[Ld Ll Lu Lr]
+	[Ih Iv]
+] bind def
+
+/_t_x_y_CanMove_b_ {
+	
+	10 dict begin
+	
+	/y exch def
+	/x exch def
+	/t exch def
+	
+	/canMove true def
+	
+	0 1 t length 1 sub { /ti exch def
+		t ti get 1 eq {
+			% world index of non-zero Tetrimino cell
+			/wi ti x y _ti_x_y_TIndexToWIndex_wi_ def			
+			
+			wi null eq {
+				/canMove false def exit
+			} {
+				
+				% walls detection
+				wi COLS mod x sub abs 2 gt {
+					/canMove false def exit
+				} if
+
+				% collision detection
+				/w WORLD wi get def
+				w EMPTY ne {
+					w 10 lt {
+						/canMove false def exit
+					} if				
+				} if				
+				
+			} ifelse
+		} if
+	} for
+	
+	canMove
+	
+	end
+} bind def
+
+% convert Tetrimino index (0-24) into world index (0-(COLS*ROWS-1))
+% leaves null if out of bounds
+/_ti_x_y_TIndexToWIndex_wi_ {
+	/y exch def
+	/x exch def
+	/ti exch def
+	
+	/wx ti 5  mod 2 sub x add def
+	/wy ti 5 idiv 2 sub y add def
+	
+	/wi wy COLS mul wx add def
+	
+	wi 0 lt wi WORLD length ge or {
+		null
+	} {
+		wi	
+	} ifelse
+} bind def
+
+%/MOVE_IN_PLACE 0 def
+/MOVE_DOWN     1 def
+/MOVE_LEFT     2 def
+/MOVE_RIGHT    3 def
+
+/DrawWorldClippingTArea {
+	
+	gsave
+	
+	0 0 COLS S mul % 1 add
+	ROWS 2 sub S mul % 1 add
+	rectclip
+	
+	Tx 3 sub S mul
+	ROWS Ty sub 3 sub S mul
+	7 S mul 2 add
+	7 S mul 2 add
+	rectclip
+
+	DrawWorld
+	
+	grestore
+} bind def
+
+/_c_r_dir_Move_b_ {
+
+	/dir exch def
+	/r exch def
+	/c exch def
+	
+	/toY Ty def
+	/toX Tx def
+	
+	dir MOVE_DOWN  eq { /toY Ty 1 add def } if
+	dir MOVE_LEFT  eq { /toX Tx 1 sub def } if
+	dir MOVE_RIGHT eq { /toX Tx 1 add def } if
+	
+	/t Tetriminos c get r get def
+	
+	/canMove t toX toY _t_x_y_CanMove_b_ def
+	
+	canMove {
+		t Tx  Ty  _t_x_y_RemoveActiveT
+		t toX toY _t_x_y_AddActiveT
+    	
+		/Tx toX def
+		/Ty toY def
+	} if
+	
+	canMove
+
+} bind def
+
+/_c_r_Spawn_b_ {
+	
+	/r exch def
+	/c exch def
+
+	/Tx 5 def
+	/Ty 2 def
+	
+	c r null _c_r_dir_Move_b_
+} bind def
+
+/MoveDown_b_ {
+	t1c t1r MOVE_DOWN _c_r_dir_Move_b_
+} bind def
+
+/_dir_Move {
+	t1c t1r 3 -1 roll _c_r_dir_Move_b_ pop
+} bind def
+
+/Rotate {
+	/r2 t1r 1 add Tetriminos t1c get length mod def
+	t1c r2 null _c_r_dir_Move_b_ { /t1r r2 def } if
+} bind def
+
+/DisableActiveT {
+	0 1 WORLD length 1 sub {
+		/i exch def
+		/x WORLD i get def
+		x 10 ge { WORLD i x 10 mod put } if			
+	} for
+} bind def
+
+/DirectDrop {
+	{ MoveDown_b_ not { exit } if } loop
+} bind def
+
+/_r_ClearRow {
+	
+	-1 2 {
+		/row exch def		
+		/rowFromAbove WORLD row 1 sub COLS mul COLS getinterval def
+		WORLD row COLS mul rowFromAbove putinterval
+		WORLD row 1 sub COLS mul [COLS {EMPTY} repeat] putinterval
+	} for
+	
+	% fill row 2 with EMPTY
+	WORLD 2 COLS mul [COLS {EMPTY} repeat] putinterval
+} bind def
+
+/_r_WhiteBlink {
+	/r exch def
+	
+	gsave
+	1 setgray
+
+	0 1 COLS 1 sub {
+		/c exch def
+		
+		gsave
+		c S mul ROWS r sub 1 sub S mul translate
+		DrawCell
+		grestore
+		
+	} for
+	
+	grestore
+	
+} bind def
+
+/CheckFullLine_b_rowsFull_ {
+	
+	/b false def
+	
+	/rowsFull [ROWS {false} repeat] def
+	
+	ROWS 1 sub -1 2 {
+	
+		/row exch def
+		
+		/lineIsFull true def
+		
+		0 1 COLS 1 sub { /col exch def			
+			WORLD row COLS mul col add get EMPTY eq {
+				/lineIsFull false def exit
+			} if
+		} for
+		
+		rowsFull row lineIsFull put
+		/b b lineIsFull or def
+	} for
+	
+	b rowsFull
+} bind def
+
+%0 srand
+
+/BAG_SIZE 7 def
+/randomBag BAG_SIZE array def
+/NewTetrimino_i_ {
+	
+	{
+		/i rand BAG_SIZE mod def
+		randomBag i get null eq { randomBag i true put exit } if
+	} loop
+
+	i
+
+	/isFull true def
+	randomBag { null eq { /isFull false def exit } if } forall
+	isFull { /randomBag BAG_SIZE array def } if
+} bind def
+
+/StartNewGame {
+	/WORLD [COLS ROWS mul {EMPTY} repeat] def
+
+	/gameIsOver false def
+	/level 1 def	
+	
+	/linesCleared 0 def
+	/score 0 def
+
+	/t1c NewTetrimino_i_ def % code
+	/t1r 0 def				 % rotation
+
+	/t2c NewTetrimino_i_ def % code
+	/t2r 0 def               % rotation
+
+	/lastDrop realtime def
+	
+	t1c t1r _c_r_Spawn_b_ pop
+
+	DrawWorld
+
+	t2c t2r _c_r_DrawNextTetrimino
+
+	DrawLevelAndScore
+} def
+
+/SpawnNextT {
+	DisableActiveT
+
+	% next T gets current T
+	/t1c t2c def
+	/t1r t2r def
+
+	t1c t1r _c_r_Spawn_b_ {
+		DrawWorldClippingTArea
+	} {
+		/gameIsOver true def
+		DrawLevelAndScore
+	} ifelse
+
+	/t2c NewTetrimino_i_ def % code
+	/t2r 0 def               % rotation
+
+	t2c t2r _c_r_DrawNextTetrimino
+} bind def
+
+/ReadHighScore_i_ {
+	SCORE_FILE status {
+		pop pop pop pop
+		SCORE_FILE (r) file (        ) readstring pop cvi
+	} {
+		0
+	} ifelse
+} bind def
+
+/_i_WriteHighScore {
+	{
+		(        ) cvs SCORE_FILE (w) file exch writestring		
+	} stopped {
+	    (-- error writing file ) = SCORE_FILE = flush
+	} if
+} bind def
+
+160 300 translate
+0.5 setlinewidth
+
+/delay 300 def
+/highscore ReadHighScore_i_ def
+
+StartNewGame
+flushpage
+200 Sleep
+
+{	
+	ReadInput_s_
+	
+	/skipDelay false def
+	
+	{
+		/key exch def
+	
+		%key 0 ne { (-------- KEY:) =only key == flush } if
+
+		gameIsOver {
+			key 110 eq { StartNewGame DrawWorld } if		
+		} {
+			key 67  eq { MOVE_RIGHT _dir_Move DrawWorldClippingTArea } if
+			key 68  eq { MOVE_LEFT  _dir_Move DrawWorldClippingTArea } if
+			key 66  eq { MoveDown_b_ pop      DrawWorldClippingTArea } if
+			key 65  eq { Rotate               DrawWorldClippingTArea } if
+
+			key 32  eq { DirectDrop DrawWorld /skipDelay true def } if		
+		} ifelse
+	
+		flushpage
+	} forall
+	
+	gameIsOver not
+	lastDrop delay add realtime lt and
+	skipDelay or {
+
+		CheckFullLine_b_rowsFull_
+		/rowsFullArray exch def
+		/hasFullRows exch def
+		
+		hasFullRows {
+		
+			DisableActiveT
+
+			0 1 ROWS 1 sub {
+				/r exch def
+				rowsFullArray r get { r _r_WhiteBlink } if
+			} for
+
+			flushpage
+			30 Sleep
+			
+			/n 0 def
+			0 1 ROWS 1 sub { /r exch def
+				rowsFullArray r get {
+					/n n 1 add def
+					r _r_ClearRow
+				} if
+			} for
+
+			/linesCleared linesCleared n add def
+			/level linesCleared 10 idiv 1 add def
+			/delay 300 level 1 sub 30 mul sub def
+			/score [40 100 300 1200] n 1 sub get level mul score add def 
+
+			score highscore gt {
+				/highscore score def
+				score _i_WriteHighScore
+			} if
+
+			DrawWorld
+			DrawLevelAndScore
+		} if
+
+		MoveDown_b_ {
+			DrawWorldClippingTArea
+		} {
+			SpawnNextT
+		} ifelse
+		
+		flushpage
+		/lastDrop realtime def
+	} if
+	
+	count 0 ne {
+		(== Stack leak ==) ==
+		count == pstack stop
+	} if
+	
+} loop

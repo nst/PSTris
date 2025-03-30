@@ -2,11 +2,11 @@
 
 %%Title: tetris.ps
 %%Creator: Nicolas Seriot
+%%Creation Date: February 2025
 
-% February 2025
 % https://github.com/nst/PSTris
 
-% gv tetris.ps
+% gs -sNOSAFER tetris.ps
 % stty raw -echo; cat >> t.txt
 
 /COLS 10 def
@@ -178,6 +178,7 @@
 
 } bind def
 
+% we may prefer [ ... ] aload length packedarray def for efficiency
 /Tu [0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0] bind def
 /Tr [0 0 0 0 0 0 0 1 0 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0] bind def
 /Td [0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 1 0 0 0 0 0 0 0] bind def
@@ -269,9 +270,9 @@
 } bind def
 
 %/MOVE_IN_PLACE 0 def
-/MOVE_DOWN     1 def
-/MOVE_LEFT     2 def
-/MOVE_RIGHT    3 def
+/MOVE_DOWN  1 def
+/MOVE_LEFT  2 def
+/MOVE_RIGHT 3 def
 
 /DrawWorldClippingTArea {
     

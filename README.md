@@ -29,7 +29,7 @@ See also:
 
 Terminal window 1:
 
-    $ gv tetris.ps
+    $ gs -sNOSAFER tetris.ps
 
 Terminal window 2:
     

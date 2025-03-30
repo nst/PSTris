@@ -25,7 +25,7 @@ See also:
 - high scores
 - Nintendo scoring scheme
 
-### Play Tetris in GhostView
+### Play Tetris in Ghostscript
 
 Terminal window 1:
 

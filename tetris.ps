@@ -20,21 +20,24 @@
 
 /INPUT_FILE (t.txt) def
 /SCORE_FILE (highscore.txt) def
+/MIDI_FILE (midi.txt) def
+/MIDI_FILE_WRITE MIDI_FILE (w) file def
 
-/CreateOrTruncateInputFile {
+/_s_CreateOrTruncateFile {
+    /s exch def
     {
-        INPUT_FILE (w) file closefile
+        s (w) file closefile
     } stopped {
-        (-- error creating file ) = INPUT_FILE = flush
+        (-- error creating file ) = s = flush
     } if
 } bind def
 
 /ReadInput_s_ {
     {
         INPUT_FILE (r) file 8 string readstring { } { } ifelse
-        dup length 0 ne { CreateOrTruncateInputFile } if
+        dup length 0 ne { INPUT_FILE _s_CreateOrTruncateFile } if
     } stopped {
-        CreateOrTruncateInputFile
+        INPUT_FILE _s_CreateOrTruncateFile
     } if
 } bind def
 
@@ -343,7 +346,10 @@
 
 /Rotate {
     /r2 t1r 1 add Tetriminos t1c get length mod def
-    t1c r2 null _c_r_dir_Move_b_ { /t1r r2 def } if
+    t1c r2 null _c_r_dir_Move_b_ {
+        /t1r r2 def
+        90 1 _note_duration_SendMIDI
+    } if
 } bind def
 
 /DisableActiveT {
@@ -355,6 +361,8 @@
 } bind def
 
 /DirectDrop {
+    60 1 _note_duration_SendMIDI
+
     { MoveDown_b_ not { exit } if } loop
 } bind def
 
@@ -373,7 +381,9 @@
 
 /_r_WhiteBlink {
     /r exch def
-    
+
+    120 10 _note_duration_SendMIDI
+        
     gsave
     1 setgray
 
@@ -435,6 +445,8 @@
 } bind def
 
 /StartNewGame {
+    MIDI_FILE _s_CreateOrTruncateFile
+
     /WORLD [COLS ROWS mul {EMPTY} repeat] def
 
     /gameIsOver false def
@@ -497,6 +509,27 @@
         (-- error writing file ) = SCORE_FILE = flush
     } if
 } bind def
+
+/_note_duration_SendMIDI {
+    /duration exch def
+    /note exch def
+    
+    /m1 (note_on  0     127\n) def
+    /m2 (note_off 0     127\n) def
+    
+    m1 11 (   ) putinterval
+    m2 11 (   ) putinterval
+    m1 11 note 3 string cvs putinterval
+    m2 11 note 3 string cvs putinterval
+    
+    MIDI_FILE_WRITE m1 writestring
+    MIDI_FILE_WRITE flushfile
+
+    duration Sleep
+
+    MIDI_FILE_WRITE m2 writestring
+    MIDI_FILE_WRITE flushfile
+} def
 
 160 300 translate
 0.5 setlinewidth

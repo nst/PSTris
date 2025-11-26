@@ -26,7 +26,7 @@ See also:
 - Nintendo scoring scheme
 - sound through external MIDI synthetizer
 
-### Play Tetris in GhostView
+### Play Tetris in Ghostscript
 
 Terminal window 1:
 

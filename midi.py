@@ -15,5 +15,5 @@ try:
             
             try: port.send(mido.Message.from_bytes(data))
             except ValueError as e: print(e)
-except Error as e:
+except (OSError, KeyboardInterrupt) as e:
     print(e)

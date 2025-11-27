@@ -16,8 +16,8 @@ See also:
 
 ### Features
 
-- 600 lines or 10 KB of PostScript
-- 69 different operators
+- 600 lines, 10 KB of PostScript
+- 69 unique operators
 - realtime input
 - direct drop
 - levels with increasing speed
@@ -40,15 +40,15 @@ Play with arrows and space bar in window 2.
 
 ### Sound (Optional)
 
-The program write midi commands in `midi.txt`.
+The program write MIDI commands in `midi.bin`.
 
-You can read this file from a helper script to turn them into a MIDI commands for a synthetizer.
+You can read `midi.bin` from a helper script to send the commands to a synthetizer.
 
-On macOS, you can use GarageBand + the MIDI brigde `midi.py`:
+On macOS, you can use GarageBand and the brigde `midi.py`:
 
     1. in "Audio MIDI Setup" application, open "IAC Driver" and check "Device in online"
     2. in "GarageBand" application, create a new empty project with a MIDI track. "8-Bit Grit" instrument works fine.
-    3. run `mkfifo midi.bin; python3 midi.py < midi.bin`
+    3. run `tail -f midi.bin | python3 midi.py`
 
 ### Notes and Limitations
 

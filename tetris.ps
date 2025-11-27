@@ -20,8 +20,7 @@
 
 /INPUT_FILE (t.txt) def
 /SCORE_FILE (highscore.txt) def
-/MIDI_FILE (midi.txt) def
-/MIDI_FILE_WRITE MIDI_FILE (w) file def
+/MIDI_FILE (midi.bin) def
 
 /_s_CreateOrTruncateFile {
     /s exch def
@@ -348,7 +347,8 @@
     /r2 t1r 1 add Tetriminos t1c get length mod def
     t1c r2 null _c_r_dir_Move_b_ {
         /t1r r2 def
-        90 1 _note_duration_SendMIDI
+        <90 78 7F> _bytes_SendMIDI 1 Sleep
+        <80 78 00> _bytes_SendMIDI
     } if
 } bind def
 
@@ -361,8 +361,9 @@
 } bind def
 
 /DirectDrop {
-    60 1 _note_duration_SendMIDI
-
+    <90 5A 7F> _bytes_SendMIDI 1 Sleep
+    <80 5A 00> _bytes_SendMIDI
+        
     { MoveDown_b_ not { exit } if } loop
 } bind def
 
@@ -382,7 +383,8 @@
 /_r_WhiteBlink {
     /r exch def
 
-    120 10 _note_duration_SendMIDI
+    <90 78 7F> _bytes_SendMIDI 1 Sleep
+    <80 78 00> _bytes_SendMIDI
         
     gsave
     1 setgray
@@ -445,8 +447,8 @@
 } bind def
 
 /StartNewGame {
-    MIDI_FILE _s_CreateOrTruncateFile
-
+    /MIDI_FILE_WRITE MIDI_FILE (w) file def
+    
     /WORLD [COLS ROWS mul {EMPTY} repeat] def
 
     /gameIsOver false def
@@ -510,24 +512,8 @@
     } if
 } bind def
 
-/_note_duration_SendMIDI {
-    /duration exch def
-    /note exch def
-    
-    /m1 (note_on  0     127\n) def
-    /m2 (note_off 0     127\n) def
-    
-    m1 11 (   ) putinterval
-    m2 11 (   ) putinterval
-    m1 11 note 3 string cvs putinterval
-    m2 11 note 3 string cvs putinterval
-    
-    MIDI_FILE_WRITE m1 writestring
-    MIDI_FILE_WRITE flushfile
-
-    duration Sleep
-
-    MIDI_FILE_WRITE m2 writestring
+/_bytes_SendMIDI {
+    MIDI_FILE_WRITE exch writestring 
     MIDI_FILE_WRITE flushfile
 } def
 

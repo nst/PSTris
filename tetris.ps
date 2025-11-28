@@ -347,8 +347,8 @@
     /r2 t1r 1 add Tetriminos t1c get length mod def
     t1c r2 null _c_r_dir_Move_b_ {
         /t1r r2 def
-        <90 78 7F> _bytes_SendMIDI 1 Sleep
-        <80 78 00> _bytes_SendMIDI
+        <90 5A 7F> _bytes_SendMIDI 1 Sleep
+        <80 5A 00> _bytes_SendMIDI
     } if
 } bind def
 
@@ -361,8 +361,8 @@
 } bind def
 
 /DirectDrop {
-    <90 5A 7F> _bytes_SendMIDI 1 Sleep
-    <80 5A 00> _bytes_SendMIDI
+    <90 3C 7F> _bytes_SendMIDI 2 Sleep
+    <80 3C 00> _bytes_SendMIDI
         
     { MoveDown_b_ not { exit } if } loop
 } bind def
@@ -383,7 +383,7 @@
 /_r_WhiteBlink {
     /r exch def
 
-    <90 78 7F> _bytes_SendMIDI 1 Sleep
+    <90 78 7F> _bytes_SendMIDI 8 Sleep
     <80 78 00> _bytes_SendMIDI
         
     gsave
@@ -459,7 +459,7 @@
     /score 0 def
 
     /t1c NewTetrimino_i_ def % code
-    /t1r 0 def                 % rotation
+    /t1r 0 def               % rotation
 
     /t2c NewTetrimino_i_ def % code
     /t2r 0 def               % rotation
